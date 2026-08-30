@@ -1,4 +1,4 @@
-import sqlite3
+import os
 import datetime
 import numpy as np
 import pandas as pd
@@ -15,7 +15,7 @@ if "scroll_lock_state" not in st.session_state:
 if "show_chart_overlay" not in st.session_state:
     st.session_state.show_chart_overlay = False
 
-# 🌟 ULTRA-COMPACT METRICS FONT CSS INJECTION (બધા બોક્સ અને આંકડા નાના કરવાનું સેટિંગ)
+# 🌟 ULTRA-COMPACT METRICS FONT CSS INJECTION
 base_css = """
     <style>
         .block-container {
@@ -32,31 +32,12 @@ base_css = """
             padding-bottom: 0px !important;
             gap: 0rem !important;
         }
-        /* 🎯 FONT REDUCTION HOOK: ઉપરના બધા બોક્સના અક્ષરો અને આંકડા નાના કરવા માટે */
-        [data-testid="stMetricLabel"] {
-            font-size: 12px !important;
-            font-weight: bold !important;
-        }
-        [data-testid="stMetricValue"] {
-            font-size: 16px !important;
-            font-weight: bold !important;
-        }
-        div[data-testid="stMetricVisibility"] {
-            margin-top: -8px !important;
-            margin-bottom: -8px !important;
-            padding: 2px !important;
-        }
-        div[data-testid="stDataFrame"] > div:first-child {
-            display: flex !important;
-            justify-content: flex-end !important;
-            width: 100% !important;
-        }
-        div[data-testid="stDataFrame"], 
-        div[data-testid="stDataFrame"] > div,
-        div[data-testid="stDataFrame"] [data-testid="stTable"],
-        .glideDataEditor {
-            width: 100% !important;
-            max-width: 100vw !important;
+        [data-testid="stMetricLabel"] { font-size: 12px !important; font-weight: bold !important; }
+        [data-testid="stMetricValue"] { font-size: 16px !important; font-weight: bold !important; }
+        div[data-testid="stMetricVisibility"] { margin-top: -8px !important; margin-bottom: -8px !important; padding: 2px !important; }
+        div[data-testid="stDataFrame"] > div:first-child { display: flex !important; justify-content: flex-end !important; width: 100% !important; }
+        div[data-testid="stDataFrame"], div[data-testid="stDataFrame"] > div, div[data-testid="stDataFrame"] [data-testid="stTable"], .glideDataEditor {
+            width: 100% !important; max-width: 100vw !important;
         }
     </style>
 """
@@ -64,24 +45,28 @@ base_css = """
 if st.session_state.scroll_lock_state:
     base_css += """
         <style>
-        div[data-testid="stDataFrame"] [data-testid="stTable"],
-        div[data-testid="stDataFrame"] .glideDataEditor,
-        div[data-testid="stDataFrame"] {
-            overflow: hidden !important;
-            pointer-events: none !important;
+        div[data-testid="stDataFrame"] [data-testid="stTable"], div[data-testid="stDataFrame"] .glideDataEditor, div[data-testid="stDataFrame"] {
+            overflow: hidden !important; pointer-events: none !important;
         }
         </style>
     """
 
 st.markdown(base_css, unsafe_allow_html=True)
-st.title("📊 Institutional Option Chain & Multi-Timeframe Candlestick Engine")
+st.title("📊 Institutional Cloud Option Chain Engine")
 
-# 2. Local Database Initialization (SQLite Setup)
-DB_FILE = "options_history.db"
+# 🌟 2. ROBUST POSTGRES / SUPABASE DATABASE ROUTER (પાકો ક્લાઉડ ટેબલ જનરેટર કોડ)
+def get_db_connection():
+    if "SUPABASE_DB_URL" in st.secrets and st.secrets["SUPABASE_DB_URL"].strip() != "":
+        import psycopg2
+        return psycopg2.connect(st.secrets["SUPABASE_DB_URL"])
+    else:
+        import sqlite3
+        return sqlite3.connect("options_history.db")
 
 def init_database():
-    conn = sqlite3.connect(DB_FILE)
+    conn = get_db_connection()
     cursor = conn.cursor()
+    # સુપાબેઝ (PostgreSQL) માટે કમ્પ્લીટલી સેફ રિયલ ક્લાઉડ ટેબલ આર્કિટેક્ચર
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS option_ticks (
             timestamp TEXT, index_name TEXT, strike INTEGER,
@@ -114,8 +99,8 @@ with col_log_dt:
 st.divider()
 
 # 4. Connection Status Sidebar Configuration
-st.sidebar.success("🔒 Connection Status: Direct Tokenless Mode Enabled")
-st.sidebar.info("Data Sourcing: Institutional Local Engine Pipeline")
+st.sidebar.success("🔒 Connection Status: 24/7 Cloud Autopilot Active")
+st.sidebar.info("Data Sourcing: Institutional Tokenless Supabase Pipeline")
 st.sidebar.markdown("---")
 st.session_state.scroll_lock_state = st.sidebar.toggle("🔒 Option Chain Scroll Lock", value=st.session_state.scroll_lock_state)
 st.sidebar.markdown("---")
@@ -170,7 +155,7 @@ df_live_captured, live_atm = fetch_tokenless_exchange_data(selected_index, total
 df_data = df_live_captured
 calculated_atm = live_atm
 
-# 7. Render Operational Option Chain Grid Top Block (Includes layout compression overrides)
+# 7. Render Operational Option Chain Grid Top Block
 if not df_data.empty:
     total_ce_oi = df_data["CE_OI"].sum()
     total_pe_oi = df_data["PE_OI"].sum()
@@ -184,14 +169,10 @@ if not df_data.empty:
     current_volume = int(volume_20_ma + np.random.randint(-15000, 25000))
     
     volume_delta_percentage = ((current_volume - volume_20_ma) / volume_20_ma) * 100.0
-    if volume_delta_percentage > 5.0:
-        vol_status = "🔴 HIGH"
-    elif volume_delta_percentage < -5.0:
-        vol_status = "🔵 LOW"
-    else:
-        vol_status = "🟢 NORMAL"
+    if volume_delta_percentage > 5.0: vol_status = "🔴 HIGH"
+    elif volume_delta_percentage < -5.0: vol_status = "🔵 LOW"
+    else: vol_status = "🟢 NORMAL"
 
-    # 🌟 COMPACT COLUMN EXPANSION: All 8 critical matrix items now sit on a tight row split to completely prevent wrapping
     c1, c2, c3, c4, c5, c6, c7, c8 = st.columns(8)
     c1.metric("🔴 Call OI", f"{total_ce_oi:,}")
     c2.metric("🟢 Put OI", f"{total_pe_oi:,}")
