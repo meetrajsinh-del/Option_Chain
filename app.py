@@ -36,11 +36,9 @@ st.title("📊 Institutional Live NSE/BSE Option Chain Engine")
 # 🌟 2. AUTOMATED NSE COOKIE BYPASS CLIENT (એનએસઈ સર્વર પાસેથી ઓરિજિનલ મફત ડેટા ખેંચવાનું સાચું એન્જિન)
 def get_real_nse_data(index_name):
     try:
-        # ઓટોમેટેડ કૂકીઝ જાર લોક સિસ્ટમ
         cj = http.cookiejar.CookieJar()
         opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(cj))
         
-        # સાચો ક્રોમ બ્રાઉઝર વ્યુ સેટ કરવો
         headers = [
             ('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'),
             ('Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8'),
@@ -169,7 +167,6 @@ if not df_data.empty:
     spot_price = real_spot_value
     future_price = spot_price + 38.20
     
-    # LOCAL/CLOUD AUTO-LOG ENGINE: આ કમાન્ડ ડેટાબેઝમાં એન્ટ્રી ઓટો-રાઇટ કરતો રહેશે
     if terminal_mode == "🟢 LIVE MARKET MODE":
         try:
             import sqlite3
